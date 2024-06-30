@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -50,6 +51,8 @@ class SquaresCustomPainter extends CustomPainter {
   final double minSideLength;
   final double minSquareSideFraction;
 
+  static final Random random = Random();
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
@@ -79,30 +82,29 @@ class SquaresCustomPainter extends CustomPainter {
 
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
+
+    final depth = random.nextInt(5) + 5;
+
     for (int index = 0; index < totalCount; index++) {
       int i = index ~/ yCount;
       int j = index % yCount;
 
       // Recursively draw squares
       drawNestedSquares(
-        canvas,
-        Offset(
-          (i * (sideLength + gap)),
-          (j * (sideLength + gap)),
-        ),
-        sideLength,
-        paint,
-      );
+          canvas,
+          Offset(
+            (i * (sideLength + gap)),
+            (j * (sideLength + gap)),
+          ),
+          sideLength,
+          paint,
+          depth);
     }
     canvas.restore();
   }
 
   void drawNestedSquares(
-    Canvas canvas,
-    Offset start,
-    double sideLength,
-    Paint paint,
-  ) {
+      Canvas canvas, Offset start, double sideLength, Paint paint, int depth) {
     // Recursively draw squares until the side of the square
     // reaches the minimum defined by the `minSideLength` input
     if (sideLength < minSideLength) return;
@@ -118,7 +120,7 @@ class SquaresCustomPainter extends CustomPainter {
     );
 
     // calculate the side length for the next square
-    final nextSideLength = sideLength * 0.8;
+    final nextSideLength = sideLength * (random.nextDouble() * 0.5 + 0.5);
 
     final nextStart = Offset(
       start.dx + sideLength / 2 - nextSideLength / 2,
@@ -126,7 +128,7 @@ class SquaresCustomPainter extends CustomPainter {
     );
 
     // recursive call with the next side length and starting point
-    drawNestedSquares(canvas, nextStart, nextSideLength, paint);
+    drawNestedSquares(canvas, nextStart, nextSideLength, paint, depth - 1);
   }
 
   @override
