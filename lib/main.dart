@@ -10,11 +10,13 @@ class MyApp extends StatelessWidget {
     this.sideLength = 80,
     this.strokeWidth = 2,
     this.gap = 30,
+    this.minSquareSideFraction = 0.2,
   });
 
   final double sideLength;
   final double strokeWidth;
   final double gap;
+  final double minSquareSideFraction;
 
   // This widget is the root of your application.
   @override
@@ -39,16 +41,18 @@ class SquaresCustomPainter extends CustomPainter {
     this.sideLength = 80,
     this.strokeWidth = 2,
     this.gap = 30,
-  });
+    this.minSquareSideFraction = 0.2,
+  }) : minSideLength = sideLength * minSquareSideFraction;
 
   final double sideLength;
   final double strokeWidth;
   final double gap;
+  final double minSideLength;
+  final double minSquareSideFraction;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.black
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
@@ -79,17 +83,50 @@ class SquaresCustomPainter extends CustomPainter {
       int i = index ~/ yCount;
       int j = index % yCount;
 
-      canvas.drawRect(
-        Rect.fromLTWH(
+      // Recursively draw squares
+      drawNestedSquares(
+        canvas,
+        Offset(
           (i * (sideLength + gap)),
           (j * (sideLength + gap)),
-          sideLength,
-          sideLength,
         ),
+        sideLength,
         paint,
       );
     }
     canvas.restore();
+  }
+
+  void drawNestedSquares(
+    Canvas canvas,
+    Offset start,
+    double sideLength,
+    Paint paint,
+  ) {
+    // Recursively draw squares until the side of the square
+    // reaches the minimum defined by the `minSideLength` input
+    if (sideLength < minSideLength) return;
+
+    canvas.drawRect(
+      Rect.fromLTWH(
+        start.dx,
+        start.dy,
+        sideLength,
+        sideLength,
+      ),
+      paint,
+    );
+
+    // calculate the side length for the next square
+    final nextSideLength = sideLength * 0.8;
+
+    final nextStart = Offset(
+      start.dx + sideLength / 2 - nextSideLength / 2,
+      start.dy + sideLength / 2 - nextSideLength / 2,
+    );
+
+    // recursive call with the next side length and starting point
+    drawNestedSquares(canvas, nextStart, nextSideLength, paint);
   }
 
   @override
